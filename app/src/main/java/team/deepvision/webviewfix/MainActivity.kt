@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
                 consoleMessage?.apply {
-                    Log.d(
+                    Log.i(
                         "WebViewLogger",
                         "${message()} -- From line ${lineNumber()} of ${sourceId()}"
                     )
@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         nScroll.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
             webView.evaluateJavascript(
                 "javascript: " +
-                        "updateFromAndroid($scrollY)", null
+                        "onAndroidScrollUpdate($scrollY)", null
             )
         })
 
