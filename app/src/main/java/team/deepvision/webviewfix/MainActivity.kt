@@ -1,6 +1,7 @@
 package team.deepvision.webviewfix
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.webkit.ConsoleMessage
@@ -62,6 +63,14 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun get() = content
+
+        @JavascriptInterface
+        fun getHeight() = Resources.getSystem().displayMetrics.heightPixels
+
+        @JavascriptInterface
+        fun yScrollTo(position: Int) {
+            nScroll.smoothScrollTo(0, position)
+        }
 
     }
 

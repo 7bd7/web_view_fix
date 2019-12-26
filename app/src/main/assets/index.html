@@ -9,9 +9,16 @@
   <script>
 
     console.log('Inside WebView!!!');
+    console.log('Screen height excluding navigation bar = ' + AndroidContent.getHeight())
 
-    function updateFromAndroid(message){
-      console.log(message)
+    window.addEventListener('androidScroll', (e) => {
+        console.log(e);
+        console.log(`scrollY: ${e.detail}`);
+    })
+
+    function updateFromAndroid(scrollY){
+      console.log(scrollY);
+      window.dispatchEvent(new CustomEvent('androidScroll', {detail: scrollY}));
     }
 
   </script>
