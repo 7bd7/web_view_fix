@@ -1,42 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        >
+        android:layout_height="400dp">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            >
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
+                android:layout_height="wrap_content">
 
                 <ImageView
                     android:id="@+id/f_sschool_day_cover"
                     android:layout_width="match_parent"
                     android:layout_height="400dp"
-                    android:scaleType="centerCrop"
                     android:background="@color/colorPrimary"
+                    android:scaleType="centerCrop"
+                    app:layout_collapseMode="parallax"
+                    app:layout_collapseParallaxMultiplier="0.65"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_collapseMode="parallax"
-                    app:layout_collapseParallaxMultiplier="0.65"
-                    tools:layout_height="400dp"
                     tools:ignore="ContentDescription"
-                    />
+                    tools:layout_height="400dp" />
 
                 <TextView
                     android:id="@+id/f_sschool_day_title"
@@ -47,14 +41,13 @@
                     android:ellipsize="end"
                     android:maxLines="9"
                     android:paddingBottom="4dp"
+                    android:text="Some principles of marriage"
                     android:textColor="@android:color/white"
                     android:textSize="26sp"
                     app:layout_constraintBottom_toTopOf="@+id/f_sschool_day_date"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    android:text="Some principles of marriage"
-                    tools:ignore="HardcodedText"
-                    />
+                    tools:ignore="HardcodedText" />
 
                 <TextView
                     android:id="@+id/f_sschool_day_date"
@@ -64,14 +57,13 @@
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="16dp"
                     android:alpha=".8"
+                    android:text="03 june"
                     android:textColor="@android:color/white"
                     android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    android:text="03 june"
-                    tools:ignore="HardcodedText"
-                    />
+                    tools:ignore="HardcodedText" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -79,28 +71,37 @@
                 android:id="@+id/app_bar"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_collapseMode="pin"
-                />
+                app:layout_collapseMode="pin" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/sschool_nscroll"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        >
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <WebView
-            android:id="@+id/sschool_webview"
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/sschool_nscroll"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorPrimaryDark"
-            tools:ignore="WebViewLayout"
+            android:layout_height="wrap_content">
+
+            <WebView
+                android:id="@+id/sschool_webview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimaryDark"
+                tools:ignore="WebViewLayout" />
+
+        </androidx.core.widget.NestedScrollView>
+
+        <include
+            android:id="@+id/main_selection_tb"
+            layout="@layout/view_sschool_selection_tb"
+            android:visibility="gone"
             />
 
-    </androidx.core.widget.NestedScrollView>
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

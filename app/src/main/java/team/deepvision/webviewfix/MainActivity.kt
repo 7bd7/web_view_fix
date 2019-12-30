@@ -4,12 +4,17 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.NestedScrollView
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.view_sschool_selection_tb.*
+import team.deepvision.webviewfix.data.Repo
 import team.deepvision.webviewfix.data.SSchoolDay
 import team.deepvision.webviewfix.data.SSchoolDayUserData
 import team.deepvision.webviewfix.data.SSchoolHighlight
@@ -20,20 +25,37 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nScroll: NestedScrollView
     private lateinit var jsInterface: AndroidContent
     private lateinit var dayData: SSchoolDay
+    private val colorAdapter = ColorAdapter()
+    private lateinit var repo: Repo
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        repo = Repo(this)
 
         setUpWebView()
+        setUpRv()
 
-        // Mock SSchoolDay
+        // Mock SSchoolDay data
         dayData = getFakeData()
 
         setDayContent(dayData.content)
+        dayData.userData.highlights.forEach {
+            jsHighlightText(it)
+        }
 
-        dayData.userData.highlights.forEach { jsHighlightText(it) }
+        // FOR TESTING
+//        webView.postDelayed({
+//            jsInterface.onTextSelected("", "", "", "")
+//        }, 8000)
+    }
+
+    private fun setUpRv() {
+        val rv = sschool_selection_tb_rv
+        rv.adapter = colorAdapter
+        colorAdapter.data = SSchoolHighlight.HighlightingColor.values().asList()
+        rv.setHasFixedSize(true)
     }
 
     private fun setDayContent(content: String) {
@@ -45,10 +67,11 @@ class MainActivity : AppCompatActivity() {
     private fun jsHighlightText(highlighting: SSchoolHighlight) {
         webView.evaluateJavascript("javascript: onAndroidHighlightText({$highlighting.selectedText}, " +
                 "{$highlighting.componentId}, {$highlighting.index}, {$highlighting.length})", null)
+        Toast.makeText(this, "Highlighting with ${highlighting.color.name} color passed to js", Toast.LENGTH_LONG).show()
     }
 
     private fun jsOnScrollUpdate(scrollY: Int) {
-        webView.evaluateJavascript("javascript: onAndroidScrollUpdate($scrollY)", null)
+        webView.evaluateJavascript("javascript: updateFromAndroid($scrollY)", null)
     }
 
     inner class AndroidContent(private val content: String) {
@@ -66,18 +89,21 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun onTextSelected(selectedText: String, componentId: String, index: String, length: String) {
-            openSelectionToolbar(selectedText, componentId, index, length)
+            openSelectionToolbar(SSchoolHighlight(SSchoolHighlight.HighlightingColor.NOT_SELECTED,
+                selectedText, dayData.id, componentId, index, length))
         }
 
     }
 
-    private fun openSelectionToolbar(selectedText: String, componentId: String, index: String, length: String) {
-        // open toolbar
-        // set ready for highlighting event
-    }
-
-    private fun saveData(selectedText: String, componentId: String, dayId: Int, index: String, length: String) {
-        // save to persistent storage
+    private fun openSelectionToolbar(selection: SSchoolHighlight) {
+        main_selection_tb.visibility = View.VISIBLE
+        colorAdapter.selectedColorValue = selection.color.argb
+        colorAdapter.listener = {
+            val result = selection.copy(color = it)
+            repo.saveHighlighting(result)
+            jsHighlightText(result)
+            main_selection_tb.visibility = View.GONE
+        }
     }
 
     private fun getFakeData(): SSchoolDay {
@@ -86,11 +112,7 @@ class MainActivity : AppCompatActivity() {
             "2020-01-01",
             "https://dv-dev.fra1.digitaloceanspaces.com/ssplus/sschool/day_cover.png",
             application.assets.open("content.json").bufferedReader().use { it.readText() },
-            SSchoolDayUserData(
-                (listOf(
-                    SSchoolHighlight(SSchoolHighlight.HighlightingColor.VIOLET,
-                        "MOCK TEXT!!!!!!!", "2020:1:1:1",
-                        "MOCK ID !!!", "1", "10")))))
+            SSchoolDayUserData((repo.getHighlights())))
     }
 
     @SuppressLint("SetJavaScriptEnabled")
