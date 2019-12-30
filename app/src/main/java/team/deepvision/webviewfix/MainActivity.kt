@@ -51,11 +51,55 @@ class MainActivity : AppCompatActivity() {
 //        }, 8000)
     }
 
-    private fun setUpRv() {
-        val rv = sschool_selection_tb_rv
-        rv.adapter = colorAdapter
-        colorAdapter.data = SSchoolHighlight.HighlightingColor.values().asList()
-        rv.setHasFixedSize(true)
+    inner class AndroidContent(private val content: String) {
+
+        /**
+         *  Allows JS code to obtain content of the sschool day in JSON format
+         */
+        @JavascriptInterface
+        fun get() = content
+
+        /**
+         *  Allows JS code to obtain content of the the height of the screen (in pixels, excluding navigation bar height)
+         */
+        @JavascriptInterface
+        fun getHeight() = Resources.getSystem().displayMetrics.heightPixels
+
+        /**
+         *  Allows JS code to pass scroll event to Android, for Y axis
+         */
+        @JavascriptInterface
+        fun yScrollTo(position: Int) {
+            nScroll.smoothScrollTo(0, position)
+        }
+
+        /**
+         *  Allows JS code to pass text selection event to Android. Triggers selection toolbar opening.
+         */
+        @JavascriptInterface
+        fun onTextSelected(selectedText: String, componentId: String, index: String, length: String) {
+            openSelectionToolbar(SSchoolHighlight(SSchoolHighlight.HighlightingColor.NOT_SELECTED,
+                selectedText, dayData.id, componentId, index, length))
+        }
+
+    }
+
+    /**
+     *  Passes scroll updated (in Y axis) to JS code. The JS function shout has exactly the same signature
+     *  as in this function.
+     */
+    private fun jsOnScrollUpdate(scrollY: Int) {
+        webView.evaluateJavascript("javascript: updateFromAndroid($scrollY)", null)
+    }
+
+    /**
+     *  Passes on highlight complete event to JS code. The JS function shout has exactly the same signature
+     *  as in this function. The last "highlighting.color.argb" parameter is the color of highlighting in ARGB representation.
+     */
+    private fun jsHighlightText(highlighting: SSchoolHighlight) {
+        webView.evaluateJavascript("javascript: onAndroidHighlightText({$highlighting.selectedText}, " +
+                "{$highlighting.componentId}, {$highlighting.index}, {$highlighting.length}, ${highlighting.color.argb})", null)
+        Toast.makeText(this, "Highlighting with ${highlighting.color.name} color passed to js", Toast.LENGTH_LONG).show()
     }
 
     private fun setDayContent(content: String) {
@@ -64,35 +108,11 @@ class MainActivity : AppCompatActivity() {
         webView.loadUrl("file:///android_asset/index.html")
     }
 
-    private fun jsHighlightText(highlighting: SSchoolHighlight) {
-        webView.evaluateJavascript("javascript: onAndroidHighlightText({$highlighting.selectedText}, " +
-                "{$highlighting.componentId}, {$highlighting.index}, {$highlighting.length})", null)
-        Toast.makeText(this, "Highlighting with ${highlighting.color.name} color passed to js", Toast.LENGTH_LONG).show()
-    }
-
-    private fun jsOnScrollUpdate(scrollY: Int) {
-        webView.evaluateJavascript("javascript: updateFromAndroid($scrollY)", null)
-    }
-
-    inner class AndroidContent(private val content: String) {
-
-        @JavascriptInterface
-        fun get() = content
-
-        @JavascriptInterface
-        fun getHeight() = Resources.getSystem().displayMetrics.heightPixels
-
-        @JavascriptInterface
-        fun yScrollTo(position: Int) {
-            nScroll.smoothScrollTo(0, position)
-        }
-
-        @JavascriptInterface
-        fun onTextSelected(selectedText: String, componentId: String, index: String, length: String) {
-            openSelectionToolbar(SSchoolHighlight(SSchoolHighlight.HighlightingColor.NOT_SELECTED,
-                selectedText, dayData.id, componentId, index, length))
-        }
-
+    private fun setUpRv() {
+        val rv = sschool_selection_tb_rv
+        rv.adapter = colorAdapter
+        colorAdapter.data = SSchoolHighlight.HighlightingColor.values().asList()
+        rv.setHasFixedSize(true)
     }
 
     private fun openSelectionToolbar(selection: SSchoolHighlight) {
