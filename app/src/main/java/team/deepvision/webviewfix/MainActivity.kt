@@ -63,15 +63,18 @@ class MainActivity : AppCompatActivity() {
          *  Allows JS code to obtain content of the the height of the screen (in pixels, excluding navigation bar height)
          */
         @JavascriptInterface
-        fun getHeight() = Resources.getSystem().displayMetrics.heightPixels
+        fun getWindowHeight() = Resources.getSystem().displayMetrics.heightPixels / Resources.getSystem().displayMetrics.density;
 
         /**
          *  Allows JS code to pass scroll event to Android, for Y axis
          */
         @JavascriptInterface
         fun yScrollTo(position: Int) {
-            nScroll.smoothScrollTo(0, position)
+            nScroll.smoothScrollTo(0, (position * Resources.getSystem().displayMetrics.density).toInt())
         }
+
+        @JavascriptInterface
+        fun yScrollOffset() = nScroll.computeVerticalScrollOffset() / Resources.getSystem().displayMetrics.density
 
         /**
          *  Allows JS code to pass text selection event to Android. Triggers selection toolbar opening.
@@ -89,7 +92,8 @@ class MainActivity : AppCompatActivity() {
      *  as in this function.
      */
     private fun jsOnScrollUpdate(scrollY: Int) {
-        webView.evaluateJavascript("javascript: updateFromAndroid($scrollY)", null)
+        val windowScrollY = scrollY / Resources.getSystem().displayMetrics.density;
+        webView.evaluateJavascript("javascript: onAndroidScrollUpdate($windowScrollY)", null)
     }
 
     /**

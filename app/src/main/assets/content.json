@@ -143,6 +143,17 @@
                 "meta":{
                   "blockId":"IMG001"
                 }
+              },
+              {
+                "id":"kw1562",
+                "props":{
+                  "text":"Рад что ты с нами :)"
+                },
+                "bot":"default",
+                "type":"message",
+                "meta":{
+                  "blockId":"TEXT001"
+                }
               }
             ],
             "zKn_L":[
