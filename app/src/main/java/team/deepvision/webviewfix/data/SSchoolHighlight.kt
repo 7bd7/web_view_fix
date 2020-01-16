@@ -13,15 +13,15 @@ data class SSchoolHighlight(
 
     enum class HighlightingColor(var argb: String, var title: String, constVal: Int) {
 
-        NOT_SELECTED("#00000000", "Transparent", 0),
-        RED("#FFD33535", "Red", 1),
-        ORANGE("#FFF09535", "Orange", 2),
-        YELLOW("#FFE9C30B", "Yellow", 3),
-        GREEN("#FF94DC3C", "Green", 4),
-        CYAN("#FF44E3B9", "Cyan", 5),
-        BLUE("#FF33ADD8", "Blue", 6),
-        DARK_BLUE("#FF3347E4", "Dark Blue", 7),
-        VIOLET("#FFBC35E0", "Violet", 8)
+        NOT_SELECTED("#000000", "Transparent", 0),
+        RED("#D33535", "Red", 1),
+        ORANGE("#F09535", "Orange", 2),
+        YELLOW("#E9C30B", "Yellow", 3),
+        GREEN("#94DC3C", "Green", 4),
+        CYAN("#44E3B9", "Cyan", 5),
+        BLUE("#33ADD8", "Blue", 6),
+        DARK_BLUE("#3347E4", "Dark Blue", 7),
+        VIOLET("#BC35E0", "Violet", 8)
 
     }
 

@@ -44,11 +44,6 @@ class MainActivity : AppCompatActivity() {
         dayData.userData.highlights.forEach {
             jsHighlightText(it)
         }
-
-        // FOR TESTING
-//        webView.postDelayed({
-//            jsInterface.onTextSelected("", "", "", "")
-//        }, 8000)
     }
 
     inner class AndroidContent(private val content: String) {
