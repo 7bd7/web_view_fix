@@ -41,9 +41,6 @@ class MainActivity : AppCompatActivity() {
         dayData = getFakeData()
 
         setDayContent(dayData.content)
-        dayData.userData.highlights.forEach {
-            jsHighlightText(it)
-        }
     }
 
     inner class AndroidContent(private val content: String) {
@@ -86,6 +83,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        @JavascriptInterface
+        fun onReady() {
+            Log.i(
+                "AndroidContent",
+                "Ready"
+            )
+
+//            dayData.userData.highlights.forEach {
+//                jsHighlightText(it)
+//            }
+        }
     }
 
     /**
@@ -102,8 +110,8 @@ class MainActivity : AppCompatActivity() {
      *  as in this function. The last "highlighting.color.argb" parameter is the color of highlighting in ARGB representation.
      */
     private fun jsHighlightText(highlighting: SSchoolHighlight) {
-        webView.evaluateJavascript("javascript: onAndroidHighlightText({$highlighting.selectedText}, " +
-                "{$highlighting.componentId}, {$highlighting.index}, {$highlighting.length}, ${highlighting.color.argb})", null)
+        webView.evaluateJavascript("javascript: onAndroidHighlightText('${highlighting.selectedText}', " +
+                "'${highlighting.componentId}', ${highlighting.index}, ${highlighting.length}, '${highlighting.color.argb}')", null)
         Toast.makeText(this, "Highlighting with ${highlighting.color.name} color passed to js", Toast.LENGTH_LONG).show()
     }
 
