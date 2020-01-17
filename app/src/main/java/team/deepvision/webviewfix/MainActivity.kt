@@ -76,8 +76,14 @@ class MainActivity : AppCompatActivity() {
          */
         @JavascriptInterface
         fun onTextSelected(selectedText: String, componentId: String, index: String, length: String) {
-            openSelectionToolbar(SSchoolHighlight(SSchoolHighlight.HighlightingColor.NOT_SELECTED,
-                selectedText, dayData.id, componentId, index, length))
+            runOnUiThread {
+                openSelectionToolbar(
+                    SSchoolHighlight(
+                        SSchoolHighlight.HighlightingColor.NOT_SELECTED,
+                        selectedText, dayData.id, componentId, index, length
+                    )
+                )
+            }
         }
 
     }
@@ -104,7 +110,8 @@ class MainActivity : AppCompatActivity() {
     private fun setDayContent(content: String) {
         jsInterface = AndroidContent(content)
         webView.addJavascriptInterface(jsInterface, "AndroidContent")
-        webView.loadUrl("file:///android_asset/index.html")
+//        webView.loadUrl("file:///android_asset/index.html")
+        webView.loadUrl("http://ui.deepvisionserver.net/")
     }
 
     private fun setUpRv() {
