@@ -1,6 +1,9 @@
 package team.deepvision.webviewfix
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
@@ -136,6 +139,16 @@ class MainActivity : AppCompatActivity() {
             val result = selection.copy(color = it)
             repo.saveHighlighting(result)
             jsHighlightText(result)
+            main_selection_tb.visibility = View.GONE
+        }
+
+        sschool_selection_tb_copy_iv.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("label", selection.selectedText)
+            clipboard.setPrimaryClip(clip)
+
+            // Show toast "text copied to clipboard" from VM
+            Toast.makeText(this, "Text copied to clipboard", Toast.LENGTH_LONG).show()
             main_selection_tb.visibility = View.GONE
         }
     }

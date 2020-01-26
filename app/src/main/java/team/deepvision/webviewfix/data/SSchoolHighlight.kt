@@ -1,5 +1,7 @@
 package team.deepvision.webviewfix.data
 
+import com.google.gson.annotations.SerializedName
+
 data class SSchoolHighlight(
 
     var color: HighlightingColor,
@@ -11,7 +13,18 @@ data class SSchoolHighlight(
 
 ) {
 
-    enum class HighlightingColor(var argb: String, var title: String, constVal: Int) {
+    enum class HighlightingColor(
+
+        @SerializedName("argb")
+        var argb: String,
+
+        @SerializedName("title")
+        var title: String,
+
+        @SerializedName("constVal")
+        var constVal: Int
+
+    ) {
 
         NOT_SELECTED("#000000", "Transparent", 0),
         RED("#D33535", "Red", 1),
