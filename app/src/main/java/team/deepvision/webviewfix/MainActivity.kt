@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
 
         setUpWebView()
         setUpRv()
+        school_selection_tb_back_iv.setOnClickListener { hideSelectionToolbar() }
 
         // Mock SSchoolDay data
         dayData = getFakeData()
@@ -78,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         fun onTextSelected(selectedText: String, componentId: String, index: String, length: String) {
             runOnUiThread {
                 openSelectionToolbar(
+                    // if (already present) -> get one; else -> tread as new
                     SSchoolHighlight(
                         SSchoolHighlight.HighlightingColor.NOT_SELECTED,
                         selectedText, dayData.id, componentId, index, length
@@ -88,14 +90,18 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun onReady() {
-            Log.i(
-                "AndroidContent",
-                "Ready"
-            )
+            Log.i("AndroidContent", "Ready")
 
-//            dayData.userData.highlights.forEach {
-//                jsHighlightText(it)
-//            }
+            runOnUiThread {
+                dayData.userData.highlights.forEach {
+                    jsHighlightText(it)
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun onDeselectText() {
+            hideSelectionToolbar()
         }
     }
 
@@ -115,14 +121,17 @@ class MainActivity : AppCompatActivity() {
     private fun jsHighlightText(highlighting: SSchoolHighlight) {
         webView.evaluateJavascript("javascript: onAndroidHighlightText('${highlighting.selectedText}', " +
                 "'${highlighting.componentId}', ${highlighting.index}, ${highlighting.length}, '${highlighting.color.argb}')", null)
-        Toast.makeText(this, "Highlighting with ${highlighting.color.name} color passed to js", Toast.LENGTH_LONG).show()
+    }
+
+    private fun jsDeselectText() {
+        webView.evaluateJavascript("javascript: deselectText()", null)
     }
 
     private fun setDayContent(content: String) {
         jsInterface = AndroidContent(content)
         webView.addJavascriptInterface(jsInterface, "AndroidContent")
 //        webView.loadUrl("file:///android_asset/index.html")
-        webView.loadUrl("http://ui.deepvisionserver.net/")
+        webView.loadUrl("https://xcontent.dev.deepvision.team/")
     }
 
     private fun setUpRv() {
@@ -139,7 +148,8 @@ class MainActivity : AppCompatActivity() {
             val result = selection.copy(color = it)
             repo.saveHighlighting(result)
             jsHighlightText(result)
-            main_selection_tb.visibility = View.GONE
+            hideSelectionToolbar()
+            jsDeselectText()
         }
 
         sschool_selection_tb_copy_iv.setOnClickListener {
@@ -149,8 +159,13 @@ class MainActivity : AppCompatActivity() {
 
             // Show toast "text copied to clipboard" from VM
             Toast.makeText(this, "Text copied to clipboard", Toast.LENGTH_LONG).show()
-            main_selection_tb.visibility = View.GONE
+            hideSelectionToolbar()
+            jsDeselectText()
         }
+    }
+
+    private fun hideSelectionToolbar() {
+        main_selection_tb.visibility = View.GONE
     }
 
     private fun getFakeData(): SSchoolDay {
