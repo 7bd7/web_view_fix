@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun jsDeselectText() {
-        webView.evaluateJavascript("javascript: deselectText()", null)
+        webView.evaluateJavascript("javascript: onAndroidDeselectText()", null)
     }
 
     private fun setDayContent(content: String) {
