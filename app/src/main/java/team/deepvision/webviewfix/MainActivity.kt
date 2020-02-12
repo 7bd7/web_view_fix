@@ -103,6 +103,17 @@ class MainActivity : AppCompatActivity() {
         fun onDeselectText() {
             hideSelectionToolbar()
         }
+
+        @JavascriptInterface
+        fun onHighlightedTextClicked(selectedText: String, componentId: String, index: String, length: String) {
+            // TODO
+        }
+
+        @JavascriptInterface
+        fun hideToolbar() {
+            hideSelectionToolbar()
+        }
+
     }
 
     /**
@@ -165,7 +176,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hideSelectionToolbar() {
-        main_selection_tb.visibility = View.GONE
+        runOnUiThread { main_selection_tb.visibility = View.GONE }
     }
 
     private fun getFakeData(): SSchoolDay {
@@ -179,9 +190,9 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setUpWebView() {
-        webView = findViewById(R.id.sschool_webview)
-        nScroll = findViewById(R.id.sschool_nscroll)
+        nScroll = sschool_nscroll
 
+        webView = sschool_webview
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
 
