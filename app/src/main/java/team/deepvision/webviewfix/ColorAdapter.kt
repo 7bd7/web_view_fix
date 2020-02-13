@@ -28,7 +28,7 @@ class ColorAdapter : RecyclerView.Adapter<ColorAdapter.Vh>() {
     override fun getItemCount() = data.size
 
     override fun onBindViewHolder(holder: Vh, position: Int) {
-        holder.bind(data[position], data[position].argb == selectedColorValue)
+        holder.bind(data[position], data[position].rgb == selectedColorValue)
     }
 
     inner class Vh(parent: ViewGroup) : RecyclerView.ViewHolder(
@@ -51,11 +51,11 @@ class ColorAdapter : RecyclerView.Adapter<ColorAdapter.Vh>() {
         }
 
         fun bind(color: SSchoolHighlight.HighlightingColor, isSelected: Boolean) {
-            if (color.argb == SSchoolHighlight.HighlightingColor.NOT_SELECTED.argb) bgColor.apply {
+            if (color.rgb == SSchoolHighlight.HighlightingColor.NOT_SELECTED.rgb) bgColor.apply {
                 visibility = View.GONE
             } else bgColor.apply {
                 visibility = View.VISIBLE
-                bgColor.setColorFilter(Color.parseColor(color.argb))
+                bgColor.setColorFilter(Color.parseColor(color.rgb))
             }
             tick.visibility = if (isSelected) View.VISIBLE else View.GONE
         }

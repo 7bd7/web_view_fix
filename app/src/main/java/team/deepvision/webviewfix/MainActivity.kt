@@ -15,6 +15,7 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.NestedScrollView
+import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.view_sschool_selection_tb.*
 import team.deepvision.webviewfix.data.Repo
@@ -30,6 +31,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dayData: SSchoolDay
     private val colorAdapter = ColorAdapter()
     private lateinit var repo: Repo
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(SSchoolHighlight.HighlightingColor::class.java, SSchoolHighlight.HighlightingColor.Serializer())
+        .registerTypeAdapter(SSchoolHighlight.HighlightingColor::class.java, SSchoolHighlight.HighlightingColor.Deserializer())
+        .create()
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         setDayContent(dayData.content)
     }
 
+    @Suppress("unused")
     inner class AndroidContent(private val content: String) {
 
         /**
@@ -79,10 +85,8 @@ class MainActivity : AppCompatActivity() {
         fun onTextSelected(selectedText: String, componentId: String, index: String, length: String) {
             runOnUiThread {
                 openSelectionToolbar(
-                    // if (already present) -> get one; else -> tread as new
                     SSchoolHighlight(
-                        SSchoolHighlight.HighlightingColor.NOT_SELECTED,
-                        selectedText, dayData.id, componentId, index, length
+                        selectedText, componentId, index, length, SSchoolHighlight.HighlightingColor.NOT_SELECTED, dayData.id
                     )
                 )
             }
@@ -91,11 +95,8 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun onReady() {
             Log.i("AndroidContent", "Ready")
-
             runOnUiThread {
-                dayData.userData.highlights.forEach {
-                    jsHighlightText(it)
-                }
+                jsHighlightText(dayData.userData.highlights)
             }
         }
 
@@ -106,7 +107,9 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun onHighlightedTextClicked(selectedText: String, componentId: String, index: String, length: String) {
-            // TODO
+            Log.wtf("AndroidContent", "onHighlightedTextClicked($selectedText)")
+            val highlighting = repo.getHighlight(selectedText, componentId, index)
+            runOnUiThread { openSelectionToolbar(highlighting) }
         }
 
         @JavascriptInterface
@@ -127,11 +130,15 @@ class MainActivity : AppCompatActivity() {
 
     /**
      *  Passes on highlight complete event to JS code. The JS function shout has exactly the same signature
-     *  as in this function. The last "highlighting.color.argb" parameter is the color of highlighting in ARGB representation.
+     *  as in this function. The last "highlighting.color.argb" parameter is the color of highlighting in RGB representation.
      */
-    private fun jsHighlightText(highlighting: SSchoolHighlight) {
+    private fun jsHighlightTextOld(highlighting: SSchoolHighlight) {
         webView.evaluateJavascript("javascript: onAndroidHighlightText('${highlighting.selectedText}', " +
-                "'${highlighting.componentId}', ${highlighting.index}, ${highlighting.length}, '${highlighting.color.argb}')", null)
+                "'${highlighting.componentId}', ${highlighting.index}, ${highlighting.length}, '${highlighting.color.rgb}')", null)
+    }
+
+    private fun jsHighlightText(highlightingList: List<SSchoolHighlight>) {
+        webView.evaluateJavascript("javascript: onAndroidHighlightText('${gson.toJson(highlightingList)}')", null)
     }
 
     private fun jsDeselectText() {
@@ -154,11 +161,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun openSelectionToolbar(selection: SSchoolHighlight) {
         main_selection_tb.visibility = View.VISIBLE
-        colorAdapter.selectedColorValue = selection.color.argb
+        colorAdapter.selectedColorValue = selection.color.rgb
         colorAdapter.listener = {
             val result = selection.copy(color = it)
-            repo.saveHighlighting(result)
-            jsHighlightText(result)
+            if (it == SSchoolHighlight.HighlightingColor.NOT_SELECTED) {
+                repo.deleteHighlighting(selection)
+            } else {
+                repo.saveHighlighting(result)
+            }
+            jsHighlightText(repo.getAllHighlights())
             hideSelectionToolbar()
             jsDeselectText()
         }
@@ -185,7 +196,7 @@ class MainActivity : AppCompatActivity() {
             "2020-01-01",
             "https://dv-dev.fra1.digitaloceanspaces.com/ssplus/sschool/day_cover.png",
             application.assets.open("content.json").bufferedReader().use { it.readText() },
-            SSchoolDayUserData((repo.getHighlights())))
+            SSchoolDayUserData((repo.getAllHighlights())))
     }
 
     @SuppressLint("SetJavaScriptEnabled")

@@ -17,16 +17,26 @@ class Repo(context: Context) {
 
     fun saveHighlighting(highlight: SSchoolHighlight) {
         prefs.edit {
-            val listOfSelections = getHighlights()
+            val listOfSelections = getAllHighlights()
             listOfSelections.add(highlight)
             putString(key, gson.toJson(listOfSelections))
-            getHighlights()
             apply()
         }
     }
 
-    fun getHighlights(): ArrayList<SSchoolHighlight> = gson.fromJson(prefs.getString(key, gson.toJson(emptyList<SSchoolHighlight>())), (object : TypeToken<List<SSchoolHighlight?>?>() {}.type))
+    fun getAllHighlights(): ArrayList<SSchoolHighlight> = gson.fromJson(prefs.getString(key, gson.toJson(emptyList<SSchoolHighlight>())), (object : TypeToken<List<SSchoolHighlight?>?>() {}.type))
 
-    private inline fun <reified T> Gson.fromJson(json: String) = this.fromJson<T>(json, object: TypeToken<T>() {}.type)
+    fun getHighlight(selectedText: String, componentId: String, index: String): SSchoolHighlight {
+        return getAllHighlights().first { it.selectedText == selectedText && it.componentId == componentId && it.index == index }
+    }
+
+    fun deleteHighlighting(highlight: SSchoolHighlight) {
+        prefs.edit {
+            val listOfSelections = getAllHighlights()
+            listOfSelections.remove(highlight)
+            putString(key, gson.toJson(listOfSelections))
+            apply()
+        }
+    }
 
 }
