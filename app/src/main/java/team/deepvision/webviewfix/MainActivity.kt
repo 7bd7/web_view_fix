@@ -132,13 +132,8 @@ class MainActivity : AppCompatActivity() {
      *  Passes on highlight complete event to JS code. The JS function shout has exactly the same signature
      *  as in this function. The last "highlighting.color.argb" parameter is the color of highlighting in RGB representation.
      */
-    private fun jsHighlightTextOld(highlighting: SSchoolHighlight) {
-        webView.evaluateJavascript("javascript: onAndroidHighlightText('${highlighting.selectedText}', " +
-                "'${highlighting.componentId}', ${highlighting.index}, ${highlighting.length}, '${highlighting.color.rgb}')", null)
-    }
-
     private fun jsHighlightText(highlightingList: List<SSchoolHighlight>) {
-        webView.evaluateJavascript("javascript: onAndroidHighlightText('${gson.toJson(highlightingList)}')", null)
+        webView.evaluateJavascript("javascript: onAndroidHighlightText'${gson.toJson(highlightingList)}'", null)
     }
 
     private fun jsDeselectText() {
