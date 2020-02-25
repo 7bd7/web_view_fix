@@ -44,7 +44,10 @@ class MainActivity : AppCompatActivity() {
 
         setUpWebView()
         setUpRv()
-        school_selection_tb_back_iv.setOnClickListener { hideSelectionToolbar() }
+        school_selection_tb_back_iv.setOnClickListener {
+            hideSelectionToolbar()
+            jsDeselectText()
+        }
 
         // Mock SSchoolDay data
         dayData = getFakeData()
@@ -82,11 +85,11 @@ class MainActivity : AppCompatActivity() {
          *  Allows JS code to pass text selection event to Android. Triggers selection toolbar opening.
          */
         @JavascriptInterface
-        fun onTextSelected(selectedText: String, componentId: String, index: String, length: String) {
+        fun onTextSelected(selectedText: String, id: String, componentId: String, index: Int, length: Int) {
             runOnUiThread {
                 openSelectionToolbar(
                     SSchoolHighlight(
-                        selectedText, componentId, index, length, SSchoolHighlight.HighlightingColor.NOT_SELECTED, dayData.id
+                        selectedText, id, componentId, index, length, SSchoolHighlight.HighlightingColor.NOT_SELECTED, dayData.id
                     )
                 )
             }
@@ -106,9 +109,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
-        fun onHighlightedTextClicked(selectedText: String, componentId: String, index: String, length: String) {
+        fun onHighlightedTextClicked(selectedText: String, id: String, componentId: String, index: Int, length: Int) {
             Log.wtf("AndroidContent", "onHighlightedTextClicked($selectedText)")
-            val highlighting = repo.getHighlight(selectedText, componentId, index)
+            val highlighting = repo.getHighlight(id)
             runOnUiThread { openSelectionToolbar(highlighting) }
         }
 
@@ -133,7 +136,7 @@ class MainActivity : AppCompatActivity() {
      *  as in this function. The last "highlighting.color.argb" parameter is the color of highlighting in RGB representation.
      */
     private fun jsHighlightText(highlightingList: List<SSchoolHighlight>) {
-        webView.evaluateJavascript("javascript: onAndroidHighlightText'${gson.toJson(highlightingList)}'", null)
+        webView.evaluateJavascript("javascript: onAndroidHighlightText(${gson.toJson(highlightingList)})", null)
     }
 
     private fun jsDeselectText() {
@@ -144,7 +147,8 @@ class MainActivity : AppCompatActivity() {
         jsInterface = AndroidContent(content)
         webView.addJavascriptInterface(jsInterface, "AndroidContent")
 //        webView.loadUrl("file:///android_asset/index.html")
-        webView.loadUrl("https://xcontent.dev.deepvision.team/")
+//        webView.loadUrl("https://xcontent.dev.deepvision.team/")
+        webView.loadUrl("http://ui.deepvisionserver.net/#/")
     }
 
     private fun setUpRv() {
@@ -158,11 +162,12 @@ class MainActivity : AppCompatActivity() {
         main_selection_tb.visibility = View.VISIBLE
         colorAdapter.selectedColorValue = selection.color.rgb
         colorAdapter.listener = {
-            val result = selection.copy(color = it)
             if (it == SSchoolHighlight.HighlightingColor.NOT_SELECTED) {
                 repo.deleteHighlighting(selection)
             } else {
-                repo.saveHighlighting(result)
+                // TODO: replace delete and save with repo.updateHighlighting()
+                repo.deleteHighlighting(selection)
+                repo.saveHighlighting(selection.copy(color = it))
             }
             jsHighlightText(repo.getAllHighlights())
             hideSelectionToolbar()
@@ -218,6 +223,15 @@ class MainActivity : AppCompatActivity() {
         nScroll.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
             jsOnScrollUpdate(scrollY)
         })
+    }
+
+    override fun onBackPressed() {
+        if (main_selection_tb.visibility == View.VISIBLE) {
+            hideSelectionToolbar()
+            jsDeselectText()
+        } else {
+            super.onBackPressed()
+        }
     }
 
 }

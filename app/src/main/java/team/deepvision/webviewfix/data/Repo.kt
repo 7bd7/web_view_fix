@@ -6,9 +6,6 @@ import androidx.preference.PreferenceManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-
-
-
 class Repo(context: Context) {
 
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -26,8 +23,8 @@ class Repo(context: Context) {
 
     fun getAllHighlights(): ArrayList<SSchoolHighlight> = gson.fromJson(prefs.getString(key, gson.toJson(emptyList<SSchoolHighlight>())), (object : TypeToken<List<SSchoolHighlight?>?>() {}.type))
 
-    fun getHighlight(selectedText: String, componentId: String, index: String): SSchoolHighlight {
-        return getAllHighlights().first { it.selectedText == selectedText && it.componentId == componentId && it.index == index }
+    fun getHighlight(id: String): SSchoolHighlight {
+        return getAllHighlights().first { it.id == id }
     }
 
     fun deleteHighlighting(highlight: SSchoolHighlight) {

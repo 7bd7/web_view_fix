@@ -7,9 +7,10 @@ import java.lang.reflect.Type
 data class SSchoolHighlight(
 
     var selectedText: String,
+    val id: String,
     var componentId: String,
-    var index: String,
-    var length: String,
+    var index: Int,
+    var length: Int,
     var color: HighlightingColor,
     var dayId: String
 
@@ -41,7 +42,7 @@ data class SSchoolHighlight(
         class Deserializer : JsonDeserializer<HighlightingColor?> {
             @Throws(JsonParseException::class)
             override fun deserialize(json: JsonElement, typeOfT: Type?, context: JsonDeserializationContext?): HighlightingColor? {
-                val values: Array<HighlightingColor> = HighlightingColor.values()
+                val values: Array<HighlightingColor> = values()
                 for (value in values) {
                     if (json.asString.contains(value.rgb)) return value
                 }
